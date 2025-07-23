@@ -145,6 +145,11 @@ data = {
                         "help": "write message to file before committing (can be combined with --dry-run)",
                     },
                     {
+                        "name": "--prepend-message",
+                        "action": "store_true",
+                        "help": "do not overwrite file when using --write-message-to-file",
+                    },
+                    {
                         "name": ["-s", "--signoff"],
                         "action": "store_true",
                         "help": "Deprecated, use 'cz commit -- -s' instead",

@@ -38,6 +38,7 @@ class CommitArgs(TypedDict, total=False):
     signoff: bool
     write_message_to_file: Path | None
     retry: bool
+    prepend_message: bool
 
 
 class Commit:
@@ -124,6 +125,7 @@ class Commit:
         dry_run = bool(self.arguments.get("dry_run"))
         write_message_to_file = self.arguments.get("write_message_to_file")
         signoff = bool(self.arguments.get("signoff"))
+        prepend_message = bool(self.arguments.get("prepend_message"))
 
         if signoff:
             out.warn(
@@ -139,15 +141,31 @@ class Commit:
         if write_message_to_file is not None and write_message_to_file.is_dir():
             raise NotAllowed(f"{write_message_to_file} is a directory")
 
+        if prepend_message and write_message_to_file is None:
+            raise NotAllowed(
+                "You cannot prepend a message to a file if you are not writing a message"
+            )
+
         m = self._get_message()
         if self.arguments.get("edit"):
             m = self.manual_edit(m)
 
         out.info(f"\n{m}\n")
 
-        if write_message_to_file:
+        if write_message_to_file and not prepend_message:
+            # Overwrite file with message
             with smart_open(write_message_to_file, "w", encoding=self.encoding) as file:
                 file.write(m)
+        elif write_message_to_file and prepend_message:
+            # Prepend message to file
+            with smart_open(
+                write_message_to_file, "r", encoding=self.encoding
+            ) as original_file:
+                original_message = original_file.read()
+            with smart_open(
+                write_message_to_file, "w", encoding=self.encoding
+            ) as modified_file:
+                modified_file.write(m + original_message)
 
         if dry_run:
             raise DryRunExit()
