@@ -123,7 +123,6 @@ class Commit:
         extra_args = self.arguments.get("extra_cli_args", "")
         dry_run = bool(self.arguments.get("dry_run"))
         write_message_to_file = self.arguments.get("write_message_to_file")
-        preserve_git_trailers = self.arguments.get("preserve_git_trailers")
         signoff = bool(self.arguments.get("signoff"))
 
         if signoff:
@@ -140,20 +139,13 @@ class Commit:
         if write_message_to_file is not None and write_message_to_file.is_dir():
             raise NotAllowed(f"{write_message_to_file} is a directory")
 
-        if preserve_git_trailers is not None and write_message_to_file is None:
-            raise NotAllowed(
-                "You do not need to use `--preserve-git-trailers` if you are not using `--write-message-to-file`"
-            )
-
         m = self._get_message()
         if self.arguments.get("edit"):
             m = self.manual_edit(m)
 
         out.info(f"\n{m}\n")
 
-        if write_message_to_file and preserve_git_trailers:
-            print("Preserving git trailers")
-        elif write_message_to_file:
+        if write_message_to_file:
             with smart_open(write_message_to_file, "w", encoding=self.encoding) as file:
                 file.write(m)
 
