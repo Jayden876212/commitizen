@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
@@ -331,3 +332,20 @@ def _get_log_as_str_list(start: str | None, end: str, args: str) -> list[str]:
     if not c.out:
         return []
     return c.out.split(f"{delimiter}\n")
+
+
+def get_config_option(config_option: str) -> str:
+    config_option_value = (
+        subprocess.run(
+            [
+                "git",
+                "config",
+                config_option,
+            ],
+            capture_output=True,
+        )
+        .stdout.strip()
+        .decode()
+    )
+
+    return config_option_value
