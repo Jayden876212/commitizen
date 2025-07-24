@@ -42,6 +42,7 @@ def prepare_commit_msg(commit_msg_file: str) -> int:
                     "--dry-run",
                     "--write-message-to-file",
                     commit_msg_file,
+                    "--prepend-message",
                 ],
                 stdin=sys.stdin,
                 stdout=sys.stdout,
