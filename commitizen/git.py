@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from enum import Enum
 from functools import lru_cache
 from pathlib import Path
@@ -349,3 +350,22 @@ def get_config_option(config_option: str) -> str:
     )
 
     return config_option_value
+
+
+def signoff_commit_msg(commit_msg_file: Path) -> None:
+    name = get_config_option("user.name")
+    email = get_config_option("user.email")
+
+    # use commitizen to generate the commit message
+    subprocess.run(
+        [
+            "git",
+            "interpret-trailers",
+            "--in-place",
+            "--trailer",
+            f"Signed-off-by: {name} <{email}>",
+            commit_msg_file.absolute(),
+        ],
+        stdin=sys.stdin,
+        stdout=sys.stdout,
+    ).check_returncode()
