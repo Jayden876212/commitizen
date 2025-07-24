@@ -157,6 +157,9 @@ class Commit:
             with smart_open(write_message_to_file, "w", encoding=self.encoding) as file:
                 file.write(m)
         elif write_message_to_file and prepend_message:
+            if self.config.settings["always_signoff"]:
+                git.signoff_commit_msg(write_message_to_file)
+
             # Prepend message to file
             with smart_open(
                 write_message_to_file, "r", encoding=self.encoding
@@ -165,7 +168,7 @@ class Commit:
             with smart_open(
                 write_message_to_file, "w", encoding=self.encoding
             ) as modified_file:
-                modified_file.write(m + original_message)
+                modified_file.write(m + "\n" + original_message)
 
         if dry_run:
             raise DryRunExit()
